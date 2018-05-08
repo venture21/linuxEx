@@ -46,7 +46,7 @@ int main(void)
 
     // 파일 읽기 -> rbuf배열에 채움
     rcount=read(fd, rbuf, 17);
-    rbuf[17]='\0';
+    rbuf[rcount]='\0';
     // 읽은 문자열 갯수를 확인 
     printf("rcount=%d\n",rcount);
 

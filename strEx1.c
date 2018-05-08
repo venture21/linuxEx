@@ -16,7 +16,7 @@ int main(void)
     int wcount;
     int rcount;
     int pos;
-    fd = open("./test.txt", O_RDWR | O_CREAT | O_TRUNC, \
+    fd = open("./test.txt", O_RDWR | O_CREAT | O_TRUNC,
           S_IRWXU | S_IWGRP | S_IRGRP | S_IROTH);
 
     if(fd==-1)
@@ -34,8 +34,7 @@ int main(void)
 
     // 파일에 쓴 문자열 갯수 출력
     printf("wcount=%d\n",wcount);
-    close(fd);
-/*
+
     // 파일내의 커서 위치를 
     // 시작점 기준으로 offset 0번지로 이동
     pos=lseek(fd, 0, SEEK_SET);
@@ -46,7 +45,8 @@ int main(void)
     printf("pos=%d\n",pos);
 
     // 파일 읽기 -> rbuf배열에 채움
-    rcount=read(fd, rbuf, BUFSIZE);
+    rcount=read(fd, rbuf, 17);
+    rbuf[17]='\0';
     // 읽은 문자열 갯수를 확인 
     printf("rcount=%d\n",rcount);
 
@@ -54,13 +54,17 @@ int main(void)
     // 읽은 버퍼의 내용 확인
     printf("rbuf : %s\n", rbuf);
     
-    strncpy(strBuffer, rbuf, 17);
-    sprintf(wbuf,"%s eggs ",strBuffer);
+    sprintf(wbuf,"%seggs ",rbuf);
 
-    printf("%s\n",strBuffer);
+    printf("wbuf1:%s\n",wbuf);
 
+    rcount=read(fd,strBuffer,BUFSIZE);
+    printf("strBuffer=%s\n",strBuffer);
+    strBuffer[rcount]='\0';
+    strcat(wbuf, strBuffer);
+    printf("%s\n",wbuf);
     wcount = write(fd, wbuf, strlen(wbuf)); 
-*/
+
     // 파일 닫기
     close(fd);
     /*

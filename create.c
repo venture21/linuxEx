@@ -5,14 +5,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#define BUFSIZE 100
+#define BUFSIZE 10
 
 int main(void)
 {
     int fd;
     char wbuf[100];
     char rbuf[100];
-    char strBuffer[100];
     int wcount;
     int rcount;
     int pos;
@@ -34,8 +33,7 @@ int main(void)
 
     // 파일에 쓴 문자열 갯수 출력
     printf("wcount=%d\n",wcount);
-    close(fd);
-/*
+
     // 파일내의 커서 위치를 
     // 시작점 기준으로 offset 0번지로 이동
     pos=lseek(fd, 0, SEEK_SET);
@@ -54,13 +52,6 @@ int main(void)
     // 읽은 버퍼의 내용 확인
     printf("rbuf : %s\n", rbuf);
     
-    strncpy(strBuffer, rbuf, 17);
-    sprintf(wbuf,"%s eggs ",strBuffer);
-
-    printf("%s\n",strBuffer);
-
-    wcount = write(fd, wbuf, strlen(wbuf)); 
-*/
     // 파일 닫기
     close(fd);
     /*

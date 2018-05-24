@@ -1,0 +1,25 @@
+shmWrite.c와 shmReader.c를 수정하여 아래와 같은 구조로 동작시키시오.
+
+Step 1. ShmWriter.c : 메세지 큐를 생성하고 shmWrite프로세스의 pid값을 shmReader 프로세스로 전달
+
+Step 2. ShmReader.c : shmWriter의 pid를 확인
+                      메세지 큐에 shmReader프로세스의 pid값을 ShmWriter 프로세스로 전달
+
+Step 3. ShmWriter.c : shmReader의 pid확인.
+
+Step 4. ShmWriter.c, ShmReader.c 
+                    : signal()함수를 호출하여 핸들러를 등록한다. (SIGUSR1을 활용)
+
+Step 5. shmWriter.c : shmget()
+                      shmat()
+                      공유메모리에 데이터쓰기 
+                      kill()함수를 통해 shmReader프로세스로 SIGUSR1 시그널을 전송한다. (데이터가 준비됨)
+
+STEP 6. shmReader.c : shmget()
+                      shmat()
+                      공유메모리에서 데이터 읽기
+                      kill()함수를 통해 shmWriter프로세스로 SIGUSR1 시그널을 전송한다. (데이터를 다 읽음) 
+                      shmdt()
+
+STEP 7. shmWriter.c : shmdt()
+                      shmctl()을 통해 공유 메모리 공간삭제

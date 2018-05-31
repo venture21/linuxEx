@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sched.h>
 
 static int count = 10;
 static pthread_mutex_t countlock = PTHREAD_MUTEX_INITIALIZER;
@@ -22,7 +23,8 @@ void* increment(void* data)
 		if(error = pthread_mutex_unlock(&countlock))
 			printf("error incr unlock\n");
 			//	return (void*)error;
-		usleep(10);
+		
+		error = sched_yield();
 	}
 }
 
@@ -41,7 +43,7 @@ void* decrement(void* data)
 		if(error=pthread_mutex_unlock(&countlock))
 			printf("error decr unlock\n");
 			//	return (void*)error;
-		usleep(10);
+		error = sched_yield();
 	}
 
 }
@@ -64,6 +66,7 @@ void* getcount(void* data)
 		*/
 		sleep(1);
 		printf("count = %d\n",count);
+		//pthread_yield();
 	}
 }
 
@@ -73,6 +76,7 @@ int main(int argc, char *argv[])
 	pthread_t p_thread[3];
 	int err;
 
+	pthread_mutex_init(&countlock, NULL);
 	if((err = pthread_create(&p_thread[0], NULL, increment, NULL) < 0))
 	{
 		perror("incr thread create error : ");

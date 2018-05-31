@@ -12,6 +12,7 @@
 
 int main()
 {
+	int i;
 	int pipe_fd, res;
 	int open_mode = O_RDONLY;
 	char buffer[BUFFER_SIZE + 1];
@@ -37,6 +38,11 @@ int main()
 				res = read(pipe_fd, buffer, BUFFER_SIZE);
 				bytes_read += res;
 		} while (res > 0);
+
+		for(i=0;i<128;i++)
+		{
+			printf("%d\n",*(buffer+i));
+		}
 		
 		(void)close(pipe_fd);
 	}

@@ -25,7 +25,8 @@ void *add_func(void *data)
 	{
 		result += i;
 	}
-	//printf("result = %lld\n", result);
+	printf("result = %lld\n", result);
+	printf("(void *)result = %p\n",(void *)result);
 	return (void *)(result);
 }
 
@@ -105,7 +106,7 @@ int main(int argc, char *argv[])
 				pthread_join(p_thread[1], (void **)&sum2);
 				//printf("add2 result : %lld\n", sum2);
 				gettimeofday(&UTCtime_e, NULL);
-				result = (long)sum1 + (long)sum2;
+				result = sum1 + sum2;
 				
 				disp_runtime(UTCtime_s, UTCtime_e);
 				printf("2 thread result = %lld\n", result); 

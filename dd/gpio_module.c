@@ -2,7 +2,7 @@
 #include <linux/cdev.h>
 #include <linux/module.h>
 #include <linux/io.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 
 #define GPIO_MAJOR 200
 #define GPIO_MINOR 0
@@ -23,6 +23,9 @@
 #define GPIO_CLR(g) (*(gpio+10) = (1<<g))
 #define GPIO_GET(g) (*(gpio+13)&(1<<g))
 #define GPIO_LED 27
+#define BUF_SIZE 100
+
+static char msg[BUF_SIZE]={0};
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("HJ Park");
@@ -30,15 +33,53 @@ MODULE_DESCRIPTION("Raspberry Pi First Device Driver");
 
 struct cdev gpio_cdev;
 
+static int gpio_open(struct inode *inod, struct file *fil);
+static int gpio_close(struct inode *inod, struct file *fil);
+static ssize_t gpio_write(struct file *inode, const char *buff, size_t len, loff_t * off);
+static ssize_t gpio_read(struct file *inode, char *buff, size_t len, loff_t *off);
+
 static struct file_operations gpio_fops = {
 	.owner = THIS_MODULE,
-	//.read  = gpio_read,
-	//.write = gpio_write,
-	//.open = gpio_open,
-	//.release = gpio_close,
+        .read  = gpio_read,
+        .write = gpio_write,
+	.open = gpio_open,
+	.release = gpio_close,
 };
 
 volatile unsigned int *gpio;
+
+static int gpio_open(struct inode *inod, struct file *fil)
+{
+	try_module_get(THIS_MODULE);
+	printk(KERN_INFO "GPIO Device opened()\n");
+	return 0;
+}
+
+static int gpio_close(struct inode *inod, struct file *fil)
+{
+	module_put(THIS_MODULE);
+	printk(KERN_INFO " GPIO Device closed()\n");
+	return 0;
+}
+
+static ssize_t gpio_write(struct file *inode, const char *buff, size_t len, loff_t * off)
+{
+    short count;
+    memset(msg, 0, BUF_SIZE);
+    count = copy_from_user(msg, buff, len);
+    printk(KERN_INFO "GPIO Device Write : %s\n", msg);
+    return count;
+}
+
+static ssize_t gpio_read(struct file *inode, char *buff, size_t len, loff_t *off)
+{
+    int count;
+    strcat(msg, " from kernel");
+
+    count = copy_to_user(buff, msg, strlen(msg)+1);
+    printk(KERN_INFO "GPIO Device read:%s\n", msg);
+    return count;
+}
 
 static int __init initModule(void)
 {
@@ -87,7 +128,17 @@ static int __init initModule(void)
 
 static void __exit cleanupModule(void)
 {
-	printk(KERN_INFO "Exit gpio_module\n");
+        dev_t devno = MKDEV(GPIO_MAJOR, GPIO_MINOR);
+        // 1. 문자 디바이스의 등록(장치번호, 장치명)을 해제한다.
+        unregister_chrdev_region(devno, 1);
+
+        // 2. 문자 디바이스의 구조체를 제거한다.
+        cdev_del(&gpio_cdev);
+
+        // 3. 문자 디바이스의 가상번지를 삭제한다.
+        if(gpio)
+            iounmap(gpio);
+        printk(KERN_INFO "Exit gpio_module : Good-bye\n");
 }
 
 //내가 생성하고자 하는 초기화함수 이름을 적어준다.
